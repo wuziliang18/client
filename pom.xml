@@ -16,8 +16,12 @@
 		<slf4j_version>1.7.7</slf4j_version>
 		<fastjson_version>1.2.11</fastjson_version>
 		<spring_version>3.1.2.RELEASE</spring_version>
+		<junit_version>4.11</junit_version>
 	</properties>
 
 	<dependencies>
 	</dependencies>
+	<modules>
+		<module>es-client</module>
+	</modules>
 </project>
