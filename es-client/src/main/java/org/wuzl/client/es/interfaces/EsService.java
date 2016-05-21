@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.elasticsearch.index.query.QueryBuilder;
 
-public interface EsService<Type, ID> {
+public interface EsService<Type> {
 	/**
 	 * 新增
 	 * 
@@ -12,7 +12,7 @@ public interface EsService<Type, ID> {
 	 * @param obj
 	 * @return
 	 */
-	public ID insert(ID id, Type obj);
+	public String insert(String id, Type obj);
 
 	/**
 	 * 新增
@@ -20,15 +20,15 @@ public interface EsService<Type, ID> {
 	 * @param obj
 	 * @return
 	 */
-	public ID insert(Type obj);
+	public String insert(Type obj);
 
 	/**
-	 * 根据id获取
+	 * 根据id获取 后期根据需要改为返回bean
 	 * 
 	 * @param id
 	 * @return
 	 */
-	public Type getById(ID id);
+	public Map<String, Object> getById(String id);
 
 	/**
 	 * 修改
@@ -37,14 +37,14 @@ public interface EsService<Type, ID> {
 	 * @param id
 	 * @param obj
 	 */
-	public void update(ID id, Type obj);
+	public void update(String id, Type obj);
 
 	/**
 	 * 删除
 	 * 
 	 * @param id
 	 */
-	public void delete(ID id);
+	public void delete(String id);
 
 	/**
 	 * 查询
@@ -52,5 +52,5 @@ public interface EsService<Type, ID> {
 	 * @param queryBuilder
 	 * @return
 	 */
-	public List<Map<String,Object>> search(QueryBuilder queryBuilder);
+	public List<Map<String, Object>> search(QueryBuilder queryBuilder);
 }

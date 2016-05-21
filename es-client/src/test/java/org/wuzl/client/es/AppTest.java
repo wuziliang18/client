@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.wuzl.client.es.interfaces.EsAdminService;
+import org.wuzl.client.es.interfaces.EsService;
 
 import com.alibaba.fastjson.JSON;
 
@@ -24,6 +25,8 @@ public class AppTest {
 		// mapping
 		// Map<String, Object> mapping=createMapping();
 		// adminService.putMapping("dayima", "topic", mapping);
+		EsService<Employee>  esService=EsServiceFactory.getEsService("dayima");
+//		esService.insert(id, obj)
 		
 	}
 
