@@ -4,11 +4,10 @@
 	<parent>
 		<groupId>org.wuzl</groupId>
 		<artifactId>client</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 	</parent>
 	<groupId>org.wuzl</groupId>
 	<artifactId>es-client</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>es-client</name>
@@ -28,6 +27,11 @@
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
 			<version>${elasticsearch_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wuzl</groupId>
+			<artifactId>client-common</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>

@@ -23,12 +23,20 @@ public interface EsService<Type> {
 	public String insert(Type obj);
 
 	/**
-	 * 根据id获取 后期根据需要改为返回bean
+	 * 根据id获取
 	 * 
 	 * @param id
 	 * @return
 	 */
-	public Map<String, Object> getById(String id);
+	public Type getById(String id);
+
+	/**
+	 * 根据id获取 map
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Map<String, Object> getByIdToMap(String id);
 
 	/**
 	 * 修改
@@ -47,10 +55,18 @@ public interface EsService<Type> {
 	public void delete(String id);
 
 	/**
+	 * 查询结果为map
+	 * 
+	 * @param queryBuilder
+	 * @return
+	 */
+	public List<Type> searchList(QueryBuilder queryBuilder);
+
+	/**
 	 * 查询
 	 * 
 	 * @param queryBuilder
 	 * @return
 	 */
-	public List<Map<String, Object>> search(QueryBuilder queryBuilder);
+	public List<Map<String, Object>> searchMapList(QueryBuilder queryBuilder);
 }

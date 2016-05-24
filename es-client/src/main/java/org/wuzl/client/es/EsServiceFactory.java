@@ -17,6 +17,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.wuzl.client.common.BeanUtil;
 import org.wuzl.client.es.interfaces.EsAdminService;
 import org.wuzl.client.es.interfaces.EsService;
 
@@ -25,7 +26,7 @@ import com.alibaba.fastjson.JSON;
 public class EsServiceFactory {
 	private static final Logger log = Logger.getLogger(EsServiceFactory.class);
 	private static Map<String, String> settings;// 连接配置
-	private static List<String> transportAddressList;// 服务端列表 格式ip:port
+	private static String transportAddress;// 服务端列表 格式ip:port,ip:port
 	private static volatile Client client;
 	private static final EsAdminService esAdminService = new EsAdminServiceImpl();// admin
 	@SuppressWarnings("rawtypes")
@@ -36,8 +37,8 @@ public class EsServiceFactory {
 		EsServiceFactory.settings = settings;
 	}
 
-	public static void setTransportAddressList(List<String> transportAddressList) {
-		EsServiceFactory.transportAddressList = transportAddressList;
+	public static void setTransportAddress(String transportAddress) {
+		EsServiceFactory.transportAddress = transportAddress;
 	}
 
 	/**
@@ -48,7 +49,7 @@ public class EsServiceFactory {
 		if (client != null) {
 			throw new RuntimeException("已经加载过了");
 		}
-		if (transportAddressList == null || transportAddressList.isEmpty()) {
+		if (transportAddress == null || transportAddress.equals("")) {
 			throw new RuntimeException("没有配置服务列表");
 		}
 		if (settings == null || settings.isEmpty()) {
@@ -57,6 +58,7 @@ public class EsServiceFactory {
 		Settings esSettings = Settings.settingsBuilder().put(settings).build();
 		TransportClient transportClient = TransportClient.builder()
 				.settings(esSettings).build();
+		String[] transportAddressList = transportAddress.split(",");
 		for (String address : transportAddressList) {
 			String[] array = address.split(":");
 			if (array.length != 2) {
@@ -80,7 +82,8 @@ public class EsServiceFactory {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static <Type> EsService<Type> getEsService(String index, String type) {
+	public static <Type> EsService<Type> getEsService(String index,
+			String type, Class<Type> clazz) {
 		ConcurrentHashMap<String, EsService> esServeiceTypeMap = esServiceMap
 				.get(index);
 		if (esServeiceTypeMap == null) {
@@ -92,8 +95,8 @@ public class EsServiceFactory {
 		if (esServeice != null) {
 			return esServeice;
 		}
-		esServeiceTypeMap.putIfAbsent(type,
-				new EsServiceImpl<Type>(index, type));
+		esServeiceTypeMap.putIfAbsent(type, new EsServiceImpl<Type>(index,
+				type, clazz));
 		return esServeiceTypeMap.get(type);
 	}
 
@@ -106,13 +109,23 @@ public class EsServiceFactory {
 		return esAdminService;
 	}
 
+	/**
+	 * 
+	 * //TODO 目前获取bean的结果有小问题 可以考虑注解+javassist
+	 * 
+	 * @author wuzl
+	 *
+	 * @param <Type>
+	 */
 	static class EsServiceImpl<Type> implements EsService<Type> {
 		private final String index;
 		private final String type;
+		private final Class<Type> clazz;
 
-		public EsServiceImpl(String index, String type) {
+		public EsServiceImpl(String index, String type, Class<Type> clazz) {
 			this.index = index;
 			this.type = type;
+			this.clazz = clazz;
 		}
 
 		@Override
@@ -130,7 +143,7 @@ public class EsServiceFactory {
 		}
 
 		@Override
-		public Map<String, Object> getById(String id) {
+		public Map<String, Object> getByIdToMap(String id) {
 			GetResponse getResponse = client.prepareGet(index, type, id)
 					.setOperationThreaded(true).get();
 			return getResponse.getSource();
@@ -150,7 +163,7 @@ public class EsServiceFactory {
 		}
 
 		@Override
-		public List<Map<String, Object>> search(QueryBuilder queryBuilder) {
+		public List<Map<String, Object>> searchMapList(QueryBuilder queryBuilder) {
 			SearchResponse response = client.prepareSearch(index)
 					.setTypes(type).setQuery(queryBuilder).get();
 			SearchHits hits = response.getHits();
@@ -159,6 +172,41 @@ public class EsServiceFactory {
 			if (searchHists.length > 0) {
 				for (SearchHit hit : searchHists) {
 					rows.add(hit.getSource());
+				}
+			}
+			return rows;
+		}
+
+		@Override
+		public Type getById(String id) {
+			GetResponse getResponse = client.prepareGet(index, type, id)
+					.setOperationThreaded(true).get();
+			Map<String, Object> map = getResponse.getSource();
+			if (map == null) {
+				return null;
+			}
+			try {
+				return BeanUtil.convertMap(clazz, map);
+			} catch (Exception e) {
+				log.error("map转换为bean异常", e);
+				return null;
+			}
+		}
+
+		@Override
+		public List<Type> searchList(QueryBuilder queryBuilder) {
+			List<Type> rows = new ArrayList<Type>();
+			SearchResponse response = client.prepareSearch(index)
+					.setTypes(type).setQuery(queryBuilder).get();
+			SearchHits hits = response.getHits();
+			SearchHit[] searchHists = hits.getHits();
+			if (searchHists.length > 0) {
+				for (SearchHit hit : searchHists) {
+					try {
+						rows.add(BeanUtil.convertMap(clazz, hit.getSource()));
+					} catch (Exception e) {
+						log.error("mao转换为bean异常", e);
+					}
 				}
 			}
 			return rows;

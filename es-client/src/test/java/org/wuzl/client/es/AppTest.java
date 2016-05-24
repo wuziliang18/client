@@ -3,6 +3,7 @@ package org.wuzl.client.es;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.wuzl.client.es.interfaces.EsAdminService;
 import org.wuzl.client.es.interfaces.EsService;
@@ -25,9 +26,19 @@ public class AppTest {
 		// mapping
 		// Map<String, Object> mapping=createMapping();
 		// adminService.putMapping("dayima", "topic", mapping);
-		EsService<Employee>  esService=EsServiceFactory.getEsService("dayima");
-//		esService.insert(id, obj)
-		
+		EsService<Employee> esService = EsServiceFactory.getEsService("dayima",
+				"topic", Employee.class);
+//		Employee employee = new Employee();
+//		employee.setFirstName("zhang");
+//		employee.setLastName("san");
+//		employee.setAge(25);
+//		employee.setAbout("zhang is good");
+//		employee.setInterests(new String[] { "book", "game" });
+//
+//		esService.insert("3", employee);
+//		outJson(esService.getById("1"));
+		outJson(esService.searchList(QueryBuilders.termQuery("lastName", "zl")));;
+
 	}
 
 	public static Map<String, Object> createMapping() {

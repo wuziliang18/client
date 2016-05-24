@@ -10,7 +10,6 @@ public class Employee {
 	private String lastName;
 	private int age;
 	private String about;
-	private String[] interests;
 
 	public long getId() {
 		return id;
@@ -52,12 +51,5 @@ public class Employee {
 		this.about = about;
 	}
 
-	public String[] getInterests() {
-		return interests;
-	}
-
-	public void setInterests(String[] interests) {
-		this.interests = interests;
-	}
 
 }
