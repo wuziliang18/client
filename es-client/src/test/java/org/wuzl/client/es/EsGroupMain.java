@@ -3,42 +3,29 @@ package org.wuzl.client.es;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.wuzl.client.es.interfaces.EsAdminService;
 import org.wuzl.client.es.interfaces.EsService;
 
 import com.alibaba.fastjson.JSON;
-
-public class AppTest {
+/**
+ * http://192.168.127.222:9200/dayima/_mapping/topic_category?pretty
+ * @author wuzl
+ *
+ */
+public class EsGroupMain {
 	public static void main(String[] args) {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"classpath:app-context.xml");
 		EsServiceFactory factory = context.getBean(EsServiceFactory.class);
 		 EsAdminService adminService = EsServiceFactory.getEsAdminService();
-		// 新建
-		 Map<String, String> settings=new HashMap<String, String>();
-		 settings.put("index.number_of_shards", "3");
-		 settings.put("index.number_of_replicas", "1");
-		 adminService.createIndex("dayima", settings);
-		// 删除
-		// adminService.deleteIndex("dayima");
 		// mapping
 		 Map<String, Object> mapping=createMapping();
-		 adminService.putMapping("dayima", "topic", mapping);
+		 adminService.putMapping("dayima", "topic_category", mapping);
 		EsService<Employee> esService = EsServiceFactory.getEsService("dayima",
-				"topic", Employee.class);
+				"topic_category", Employee.class);
 		
-//		Employee employee = new Employee();
-//		employee.setFirstName("zhang");
-//		employee.setLastName("san");
-//		employee.setAge(25);
-//		employee.setAbout("zhang is good");
-//		employee.setInterests(new String[] { "book", "game" });
-//
-//		esService.insert("3", employee);
-		outJson(esService.getByIdToMap("8322286"));
-//		outJson(esService.searchList(QueryBuilders.termQuery("lastName", "zl")));;
+		outJson(esService.getByIdToMap("259518"));
 
 	}
 
@@ -50,106 +37,95 @@ public class AppTest {
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicId", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicTopicCategoryId", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicUid", fieldMap);
+		properties.put("topicCategoryId", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "string");
 		fieldMap.put("analyzer", "ik");
-		properties.put("topicTitle", fieldMap);
+		properties.put("topicCategoryTitle", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryNum", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryDisplayorder", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryStatus", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryDateline", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "string");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryPic", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryLastUpload", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryCatId", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryUid", fieldMap);
+		fieldMap = new HashMap<String, Object>();
+		fieldMap.put("type", "long");
+		fieldMap.put("index", "not_analyzed");
+		properties.put("topicCategoryMembernum", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "string");
 		fieldMap.put("analyzer", "ik");
-		properties.put("topicContent", fieldMap);
+		properties.put("topicCategoryDescs", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicStatus", fieldMap);
+		properties.put("topicCategoryType", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicDateline", fieldMap);
+		properties.put("topicCategoryTeamType", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "string");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicIp", fieldMap);
+		properties.put("topicCategoryVerfitycode", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicReplynum", fieldMap);
+		properties.put("topicCategoryVerfitySmsTime", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicLastreplytime", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicSettop", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicLastoptime", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicLock", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicSetbottom", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicFlag", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicDigest", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicCreatetime", fieldMap);
+		properties.put("topicCategoryVerfityTime", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "string");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicLastpost", fieldMap);
+		properties.put("topicCategoryMobile", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicFavnum", fieldMap);
+		properties.put("topicCategoryCalval", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicAttachPictures", fieldMap);
+		properties.put("topicCategoryManual", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "long");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicViewnum", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicSettoptime", fieldMap);
-		fieldMap = new HashMap<String, Object>();
-		fieldMap.put("type", "long");
-		fieldMap.put("index", "not_analyzed");
-		properties.put("topicHidden", fieldMap);
+		properties.put("topicCategoryReplynum", fieldMap);
 		fieldMap = new HashMap<String, Object>();
 		fieldMap.put("type", "string");
 		fieldMap.put("index", "not_analyzed");
-		properties.put("topicTopicCategoryTitle", fieldMap);
-
-
-		mapping.put("properties", properties);
-		// // _id
+		properties.put("topicCategoryLink", fieldMap);
 		// Map<String, Object> idMap = new HashMap<String, Object>();
 		// idMap.put("path", "id");
 		// mapping.put("_id", idMap);
+		mapping.put("properties", properties);
 		return mapping;
 	}
 

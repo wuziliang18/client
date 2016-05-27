@@ -2,7 +2,8 @@ package org.wuzl.client.es.interfaces;
 
 import java.util.List;
 import java.util.Map;
-import org.elasticsearch.index.query.QueryBuilder;
+
+import org.elasticsearch.action.search.SearchRequestBuilder;
 
 public interface EsService<Type> {
 	/**
@@ -21,6 +22,13 @@ public interface EsService<Type> {
 	 * @return
 	 */
 	public String insert(Type obj);
+
+	/**
+	 * 批量操作 key是主键 value是对象
+	 * 
+	 * @param objs
+	 */
+	public void bulk(Map<String, Type> objs);
 
 	/**
 	 * 根据id获取
@@ -60,7 +68,7 @@ public interface EsService<Type> {
 	 * @param queryBuilder
 	 * @return
 	 */
-	public List<Type> searchList(QueryBuilder queryBuilder);
+	public List<Type> searchList(SearchRequestBuilder searchRequestBuilder);
 
 	/**
 	 * 查询
@@ -68,5 +76,14 @@ public interface EsService<Type> {
 	 * @param queryBuilder
 	 * @return
 	 */
-	public List<Map<String, Object>> searchMapList(QueryBuilder queryBuilder);
+	public List<Map<String, Object>> searchMapList(
+			SearchRequestBuilder searchRequestBuilder);
+
+	/**
+	 * 获取查询构造
+	 * 
+	 * @return
+	 */
+	public SearchRequestBuilder getSearchRequestBuilder();
+
 }

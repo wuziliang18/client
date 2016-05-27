@@ -2,22 +2,29 @@ package org.wuzl.client.es;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.highlight.HighlightField;
 import org.wuzl.client.common.BeanUtil;
+import org.wuzl.client.common.support.BeanParse;
+import org.wuzl.client.common.support.BeanParseFactory;
 import org.wuzl.client.es.interfaces.EsAdminService;
 import org.wuzl.client.es.interfaces.EsService;
 
@@ -74,7 +81,7 @@ public class EsServiceFactory {
 		log.info("esclient加载完毕");
 	}
 
-	public void destory() {
+	public static void destory() {
 		if (client != null) {
 			client.close();
 			client = null;
@@ -163,9 +170,9 @@ public class EsServiceFactory {
 		}
 
 		@Override
-		public List<Map<String, Object>> searchMapList(QueryBuilder queryBuilder) {
-			SearchResponse response = client.prepareSearch(index)
-					.setTypes(type).setQuery(queryBuilder).get();
+		public List<Map<String, Object>> searchMapList(
+				SearchRequestBuilder searchRequestBuilder) {
+			SearchResponse response = searchRequestBuilder.setTypes(type).get();
 			SearchHits hits = response.getHits();
 			SearchHit[] searchHists = hits.getHits();
 			List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
@@ -186,7 +193,7 @@ public class EsServiceFactory {
 				return null;
 			}
 			try {
-				return BeanUtil.convertMap(clazz, map);
+				return getBeanByMap(map);
 			} catch (Exception e) {
 				log.error("map转换为bean异常", e);
 				return null;
@@ -194,22 +201,70 @@ public class EsServiceFactory {
 		}
 
 		@Override
-		public List<Type> searchList(QueryBuilder queryBuilder) {
+		public List<Type> searchList(SearchRequestBuilder searchRequestBuilder) {
 			List<Type> rows = new ArrayList<Type>();
-			SearchResponse response = client.prepareSearch(index)
-					.setTypes(type).setQuery(queryBuilder).get();
+			SearchResponse response = searchRequestBuilder.setTypes(type).get();
 			SearchHits hits = response.getHits();
 			SearchHit[] searchHists = hits.getHits();
 			if (searchHists.length > 0) {
 				for (SearchHit hit : searchHists) {
 					try {
-						rows.add(BeanUtil.convertMap(clazz, hit.getSource()));
+						Map<String, Object> source = hit.getSource();
+						Map<String, List<String>> highLight = getHigthLight(hit);
+						source.put("_highLightMap", highLight);
+						rows.add(getBeanByMap(source));
 					} catch (Exception e) {
-						log.error("mao转换为bean异常", e);
+						log.error("map转换为bean异常", e);
 					}
 				}
 			}
 			return rows;
+		}
+
+		@Override
+		public SearchRequestBuilder getSearchRequestBuilder() {
+			return client.prepareSearch(index);
+		}
+
+		private Type getBeanByMap(Map<String, Object> map) throws Exception {
+			BeanParse<Type> beanParse = BeanParseFactory.getBeanParse(type);
+			if (beanParse != null) {
+				return beanParse.getBeanFromMap(map);
+			}
+			return BeanUtil.convertMap(clazz, map);
+		}
+
+		private Map<String, List<String>> getHigthLight(SearchHit hit) {
+			if (hit != null && hit.getHighlightFields() != null) {
+				Map<String, List<String>> map = new HashMap<String, List<String>>();
+				Map<String, HighlightField> highlightFields = hit
+						.getHighlightFields();
+				for (Map.Entry<String, HighlightField> entry : highlightFields
+						.entrySet()) {
+					List<String> texts = new ArrayList<String>();
+					Text[] textArray = entry.getValue().getFragments();
+					for (Text text : textArray) {
+						texts.add(text.string());
+					}
+					map.put(entry.getKey(), texts);
+				}
+				return map;
+			}
+			return null;
+		}
+
+		@Override
+		public void bulk(Map<String, Type> objs) {
+			BulkRequestBuilder bulkRequest = client.prepareBulk();
+			for (Map.Entry<String, Type> entry : objs.entrySet()) {
+				bulkRequest.add(client
+						.prepareIndex(index, type, entry.getKey()).setSource(
+								JSON.toJSONString(entry.getValue())));
+			}
+			BulkResponse bulkResponse = bulkRequest.get();
+			if (bulkResponse.hasFailures()) {
+				log.error("bulk异常" + bulkResponse.buildFailureMessage());
+			}
 		}
 	}
 

@@ -3,14 +3,17 @@ package org.wuzl.client.es;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.wuzl.client.es.interfaces.EsAdminService;
 import org.wuzl.client.es.interfaces.EsService;
 
 import com.alibaba.fastjson.JSON;
-
-public class AppTest {
+/**
+ * http://192.168.124.54:9200/dayima/_mapping/topic?pretty
+ * @author wuzl
+ *
+ */
+public class EsTopicMain {
 	public static void main(String[] args) {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"classpath:app-context.xml");
@@ -26,18 +29,21 @@ public class AppTest {
 		// mapping
 		 Map<String, Object> mapping=createMapping();
 		 adminService.putMapping("dayima", "topic", mapping);
-		EsService<Employee> esService = EsServiceFactory.getEsService("dayima",
-				"topic", Employee.class);
+		EsService<Map> esService = EsServiceFactory.getEsService("dayima",
+				"topic", Map.class);
 		
 //		Employee employee = new Employee();
 //		employee.setFirstName("zhang");
 //		employee.setLastName("san");
 //		employee.setAge(25);
 //		employee.setAbout("zhang is good");
-//		employee.setInterests(new String[] { "book", "game" });
+//		outJson(employee);
 //
 //		esService.insert("3", employee);
-		outJson(esService.getByIdToMap("8322286"));
+//		Map<String,Object> obj=new HashMap<String,Object>();
+//		obj.put("topicViewnum", "100");
+//		esService.update("8322286", obj);
+//		outJson(esService.getByIdToMap("8322286"));
 //		outJson(esService.searchList(QueryBuilders.termQuery("lastName", "zl")));;
 
 	}
