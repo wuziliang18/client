@@ -17,6 +17,33 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>${fastjson_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j_version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j_version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.30</version>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit_version}</version>
@@ -28,4 +55,100 @@
 			<version>0.0.1</version>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<source>1.7</source>
+					<target>1.7</target>
+					<fork>true</fork>
+					<compilerVersion>1.7</compilerVersion>
+					<showWarnings>false</showWarnings>
+					<compilerArgument>-nowarn</compilerArgument>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptor>src/main/assembly/assembly.xml</descriptor>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<!-- 该目录下所有文件进行占位符替换 -->
+				<directory> src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>*.conf</include>
+					<include>*.properties</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>*.*</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+	<profiles>
+		<!-- 开发配置 -->
+		<profile>
+			<id>develop</id>
+			<activation>
+				<!-- 默认激活 -->
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<!-- 具体配置 -->
+			<properties>
+
+				<jdbc.url>jdbc:mysql://dbserver:3306/dayima</jdbc.url>
+				<jdbc.username>kangseed</jdbc.username>
+				<jdbc.password>JuiIo90PoiUiejOiu38Hu</jdbc.password>
+
+				<es.server.url>192.168.127.222:9300</es.server.url>
+			</properties>
+		</profile>
+		<!-- 测试配置-P test激活 -->
+		<profile>
+			<id>test</id>
+			<!-- 具体配置 -->
+			<properties>
+
+				<jdbc.url>jdbc:mysql://dbserver:3306/dayima</jdbc.url>
+				<jdbc.username>kangseed</jdbc.username>
+				<jdbc.password>JuiIo90PoiUiejOiu38Hu</jdbc.password>
+
+				<es.server.url>192.168.127.222:9300</es.server.url>
+			</properties>
+		</profile>
+		<!-- 生产配置 -P product激活 -->
+		<profile>
+			<id>product</id>
+			<!-- 具体配置 -->
+			<properties>
+
+				<jdbc.url>jdbc:mysql://db4:3306/dayima</jdbc.url>
+				<jdbc.username>kangseed</jdbc.username>
+				<jdbc.password>JuiIo90PoiUiejOiu38Hu</jdbc.password>
+
+				<es.server.url>192.168.127.222:9300</es.server.url>
+			</properties>
+		</profile>
+	</profiles>
 </project>
